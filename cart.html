@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitobUz — Savatcha va Buyurtmani Rasmiylashtirish | Корзина</title>
+  <meta name="description"
+    content="Xarid qilingan kitoblarni tekshirish, promo-kod kiritish va Telegram bot orqali tezkor buyurtma berish sahifasi.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-title: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg: #090d16;
+      --bg-alt: #0f172a;
+      --surface: #131b2e;
+      --surface-card: rgba(19, 27, 46, 0.75);
+      --surface-glass: rgba(19, 27, 46, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.35);
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 40px -5px rgba(0, 0, 0, 0.7);
+
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-alt: #f1f5f9;
+      --surface: #ffffff;
+      --surface-card: rgba(255, 255, 255, 0.85);
+      --surface-glass: rgba(255, 255, 255, 0.75);
+      --border: rgba(0, 0, 0, 0.09);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.2);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+      color: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Ambient */
+    .bg-ambient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.28;
+    }
+
+    .orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      top: -100px;
+      left: 15%;
+    }
+
+    .orb-2 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, var(--success) 0%, transparent 70%);
+      bottom: 10%;
+      right: 10%;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+      gap: 20px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.45rem;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.25rem;
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 0;
+      position: relative;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      position: relative;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Lang Menu */
+    .lang-dropdown {
+      position: relative;
+    }
+
+    .lang-btn {
+      padding: 8px 14px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 150px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      list-style: none;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 100;
+    }
+
+    .lang-menu.show {
+      display: flex;
+    }
+
+    .lang-item {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .lang-item:hover,
+    .lang-item.active {
+      background: var(--bg-alt);
+      color: var(--primary);
+    }
+
+    /* CART & CHECKOUT PAGE */
+    .cart-page {
+      padding-top: 110px;
+      padding-bottom: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      margin-bottom: 35px;
+    }
+
+    .page-title {
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .cart-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+
+    /* Cart Items Table / Card */
+    .cart-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .cart-item-row {
+      display: grid;
+      grid-template-columns: 70px 1fr auto auto auto;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cart-item-row:last-child {
+      border-bottom: none;
+    }
+
+    .cart-thumb {
+      width: 60px;
+      height: 80px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+    }
+
+    .item-meta h4 {
+      font-family: var(--font-title);
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .item-unit-price {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .qty-ctrl {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+    }
+
+    .qty-btn {
+      width: 24px;
+      height: 24px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-val {
+      font-size: 0.9rem;
+      font-weight: 700;
+      width: 24px;
+      text-align: center;
+    }
+
+    .item-total-price {
+      font-family: var(--font-title);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent);
+      min-width: 100px;
+      text-align: right;
+    }
+
+    .delete-item-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all var(--transition-fast);
+    }
+
+    .delete-item-btn:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Coupon Box */
+    .coupon-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      box-shadow: 0 8px 20px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn-outline {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    /* CHECKOUT FORM CARD */
+    .checkout-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .checkout-title {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    /* Summary Breakdown */
+    .summary-list {
+      background: var(--bg-alt);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 10px 0 20px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.92rem;
+    }
+
+    .summary-row.total {
+      font-size: 1.3rem;
+      font-weight: 900;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Payment Radio Cards */
+    .payment-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .pay-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      background: var(--bg-alt);
+      font-size: 0.9rem;
+      font-weight: 700;
+      transition: all var(--transition-fast);
+    }
+
+    .pay-card.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--primary);
+    }
+
+    /* Empty state */
+    .empty-cart-view {
+      text-align: center;
+      padding: 80px 20px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    /* Modal for Order Success */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .success-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 36px;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .success-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 20px;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 90px;
+      right: 24px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .toast-success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast-error {
+      border-left: 4px solid var(--danger);
+    }
+
+    .toast-info {
+      border-left: 4px solid var(--primary);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 60px 0 30px;
+      margin-top: auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 900px) {
+      .cart-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-item-row {
+        grid-template-columns: 50px 1fr;
+        gap: 10px;
+      }
+
+      .qty-ctrl,
+      .item-total-price,
+      .delete-item-btn {
+        grid-column: span 1;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-ambient">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-logo">
+        <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+        <span>Kitob<span class="text-gradient">Uz</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link" data-i18n="nav_home">Bosh sahifa</a></li>
+          <li><a href="catalog.html" class="nav-link" data-i18n="nav_catalog">Katalog</a></li>
+          <li><a href="book-detail.html" class="nav-link" data-i18n="nav_details">Kitob tafsiloti</a></li>
+          <li><a href="favorites.html" class="nav-link" data-i18n="nav_favorites">Sevimlilar</a></li>
+          <li><a href="cart.html" class="nav-link active" data-i18n="nav_cart">Savatcha</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <div class="lang-dropdown">
+          <button class="lang-btn" id="langBtn">
+            <i class="fa-solid fa-globe"></i>
+            <span id="currentLangLabel">UZ</span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+          </button>
+          <ul class="lang-menu" id="langMenu">
+            <li class="lang-item active" onclick="setLanguage('uz')">🇺🇿 O'zbekcha</li>
+            <li class="lang-item" onclick="setLanguage('ru')">🇷🇺 Русский</li>
+            <li class="lang-item" onclick="setLanguage('en')">🇬🇧 English</li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="action-btn" id="themeToggleBtn" title="Mavzu">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <!-- Wishlist -->
+        <a href="favorites.html" class="action-btn" title="Sevimlilar">
+          <i class="fa-regular fa-heart"></i>
+          <span class="badge-count" id="favCountBadge">0</span>
+        </a>
+
+        <!-- Cart -->
+        <a href="cart.html" class="action-btn" title="Savatcha">
+          <i class="fa-solid fa-bag-shopping" style="color: var(--primary);"></i>
+          <span class="badge-count" id="cartCountBadge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CART & CHECKOUT -->
+  <main class="cart-page">
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="page-title">
+          <span data-i18n="cart_title_1">Savatcha va</span>
+          <span class="text-gradient" data-i18n="cart_title_2">Buyurtma</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1rem;" data-i18n="cart_subtitle">
+          Tanlangan kitoblar ro'yxati, chegirma kuponi va Telegram orqali to'g'ridan-to'g'ri xarid qilish.
+        </p>
+      </div>
+
+      <!-- Main Layout: Cart Items on Left, Checkout Form on Right -->
+      <div id="cartContentWrap">
+        <!-- Injected via JS -->
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ORDER SUCCESS MODAL -->
+  <div class="modal-overlay" id="orderSuccessModal">
+    <div class="success-modal">
+      <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+      <h2 style="font-family: var(--font-title); font-size: 1.7rem; font-weight: 800; margin-bottom: 8px;"
+        data-i18n="order_success_title">
+        Buyurtmangiz Qabul Qilindi!
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;" data-i18n="order_success_desc">
+        Barcha tafsilotlar Telegram botga yuborildi. Kuryerimiz tez orada siz bilan bog'lanadi.
+      </p>
+
+      <div
+        style="background: var(--bg-alt); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 24px; font-family: var(--font-mono); font-size: 0.95rem;">
+        Buyurtma raqami: <strong id="successOrderId" style="color: var(--primary);">#ORD-8492</strong>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <a href="/" class="btn btn-primary" style="flex: 1;">
+          <i class="fa-solid fa-house"></i> <span data-i18n="btn_back_home">Bosh sahifaga qaytish</span>
+        </a>
+        <a href="catalog.html" class="btn btn-outline" style="flex: 1;">
+          <i class="fa-solid fa-book"></i> <span data-i18n="btn_continue_shopping">Xaridni davom ettirish</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 14px;">
+            <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+            <span>Kitob<span class="text-gradient">Uz</span></span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Telegram bot integratsiyalangan avtomatik savatcha
+            tizimi.</p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Sahifalar</h4>
+          <p><a href="/" style="color: var(--text-muted); font-size: 0.9rem;">Bosh sahifa</a></p>
+          <p><a href="catalog.html" style="color: var(--text-muted); font-size: 0.9rem;">Katalog</a></p>
+          <p><a href="favorites.html" style="color: var(--text-muted); font-size: 0.9rem;">Sevimlilar</a></p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Xavfsiz To'lov</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Click, Payme, Uzum va Naqd pul orqali.</p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Aloqa</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Telegram: @kitobuz_bot</p>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Ish vaqti: 24/7</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 KitobUz. Telegram Web App & Checkout Architecture.</div>
+        <div>Vercel & Netlify Ready</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       I18N TRANSLATIONS
+       ========================================================================== */
+    const TRANSLATIONS = {
+      uz: {
+        nav_home: "Bosh sahifa",
+        nav_catalog: "Katalog",
+        nav_details: "Kitob tafsiloti",
+        nav_favorites: "Sevimlilar",
+        nav_cart: "Savatcha",
+        cart_title_1: "Savatcha va",
+        cart_title_2: "Buyurtma",
+        cart_subtitle: "Tanlangan kitoblar ro'yxati, chegirma kuponi va Telegram orqali to'g'ridan-to'g'ri xarid qilish.",
+        empty_cart_title: "Savatchangiz bo'sh",
+        empty_cart_desc: "Hali hech qanday kitob tanlamadingiz. Bestseller kitoblarimizni ko'rib chiqing!",
+        btn_explore_catalog: "Katalogga o'tish",
+        coupon_placeholder: "Promo-kod (masalan: KITOB20)",
+        btn_apply_coupon: "Qo'llash",
+        checkout_header: "Mijoz Ma'lumotlari",
+        label_name: "Ism va Familiyangiz:",
+        label_phone: "Telefon raqamingiz:",
+        label_city: "Viloyat / Shahar:",
+        label_address: "Aniq yetkazib berish manzili:",
+        label_payment: "To'lov turi:",
+        label_comment: "Kuryer uchun izoh (ixtiyoriy):",
+        summary_subtotal: "Kitoblar narxi:",
+        summary_discount: "Chegirma:",
+        summary_delivery: "Yetkazib berish:",
+        summary_free: "Bepul",
+        summary_total: "Jami to'lov:",
+        btn_submit_order: "Buyurtmani Rasmiylashtirish (Telegram)",
+        order_success_title: "Buyurtmangiz Qabul Qilindi!",
+        order_success_desc: "Barcha tafsilotlar Telegram botga yuborildi. Kuryerimiz tez orada siz bilan bog'lanadi.",
+        btn_back_home: "Bosh sahifaga qaytish",
+        btn_continue_shopping: "Xaridni davom ettirish"
+      },
+      ru: {
+        nav_home: "Главная",
+        nav_catalog: "Каталог",
+        nav_details: "О книге",
+        nav_favorites: "Избранное",
+        nav_cart: "Корзина",
+        cart_title_1: "Корзина и",
+        cart_title_2: "Оформление",
+        cart_subtitle: "Список выбранных книг, промокод на скидку и моментальная отправка в Telegram бот.",
+        empty_cart_title: "Ваша корзина пуста",
+        empty_cart_desc: "Вы еще не добавили ни одной книги. Ознакомьтесь с нашими бестселлерами!",
+        btn_explore_catalog: "Перейти в каталог",
+        coupon_placeholder: "Промокод (например: KITOB20)",
+        btn_apply_coupon: "Применить",
+        checkout_header: "Контактные Данные",
+        label_name: "Ваше Имя и Фамилия:",
+        label_phone: "Номер телефона:",
+        label_city: "Область / Город:",
+        label_address: "Точный адрес доставки:",
+        label_payment: "Способ оплаты:",
+        label_comment: "Комментарий для курьера:",
+        summary_subtotal: "Сумма товаров:",
+        summary_discount: "Скидка:",
+        summary_delivery: "Доставка:",
+        summary_free: "Бесплатно",
+        summary_total: "Итого к оплате:",
+        btn_submit_order: "Оформить Заказ (Telegram)",
+        order_success_title: "Заказ Успешно Принят!",
+        order_success_desc: "Все детали отправлены в Telegram бот. Наш оператор свяжется с вами в ближайшее время.",
+        btn_back_home: "На главную",
+        btn_continue_shopping: "Продолжить покупки"
+      },
+      en: {
+        nav_home: "Home",
+        nav_catalog: "Catalog",
+        nav_details: "Book Details",
+        nav_favorites: "Favorites",
+        nav_cart: "Cart",
+        cart_title_1: "Shopping Cart &",
+        cart_title_2: "Checkout",
+        cart_subtitle: "Review selected books, apply discount voucher, and dispatch order straight to Telegram.",
+        empty_cart_title: "Your cart is empty",
+        empty_cart_desc: "You haven't added any books yet. Explore our curated library!",
+        btn_explore_catalog: "Browse Catalog",
+        coupon_placeholder: "Promo code (e.g. KITOB20)",
+        btn_apply_coupon: "Apply",
+        checkout_header: "Delivery Details",
+        label_name: "Full Name:",
+        label_phone: "Phone Number:",
+        label_city: "Region / City:",
+        label_address: "Detailed Street Address:",
+        label_payment: "Payment Method:",
+        label_comment: "Delivery Notes (optional):",
+        summary_subtotal: "Items Total:",
+        summary_discount: "Discount:",
+        summary_delivery: "Delivery:",
+        summary_free: "Free",
+        summary_total: "Grand Total:",
+        btn_submit_order: "Confirm Order via Telegram",
+        order_success_title: "Order Placed Successfully!",
+        order_success_desc: "Your order details have been dispatched to our Telegram bot. We'll be in touch shortly.",
+        btn_back_home: "Back to Home",
+        btn_continue_shopping: "Continue Shopping"
+      }
+    };
+
+    let currentLang = localStorage.getItem('kitob_lang') || 'uz';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('kitob_lang', lang);
+      document.getElementById('currentLangLabel').textContent = lang.toUpperCase();
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[lang][k]) el.textContent = TRANSLATIONS[lang][k];
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const k = el.getAttribute('data-i18n-placeholder');
+        if (TRANSLATIONS[lang][k]) el.placeholder = TRANSLATIONS[lang][k];
+      });
+
+      document.getElementById('langMenu').classList.remove('show');
+      renderCartPage();
+    }
+
+    document.getElementById('langBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('langMenu').classList.toggle('show');
+    });
+    document.addEventListener('click', () => document.getElementById('langMenu').classList.remove('show'));
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    let currentTheme = localStorage.getItem('kitob_theme') || 'dark';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('kitob_theme', theme);
+      themeBtn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    }
+    themeBtn.addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(currentTheme);
+    });
+
+    /* ==========================================================================
+       CART STATE & DISCOUNT
+       ========================================================================== */
+    let cart = JSON.parse(localStorage.getItem('kitob_cart')) || [];
+    let favorites = JSON.parse(localStorage.getItem('kitob_favorites')) || [];
+    let discountPercent = 0;
+    let selectedPayment = 'Payme';
+
+    function updateBadges() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCountBadge').textContent = totalCount;
+      document.getElementById('favCountBadge').textContent = favorites.length;
+    }
+
+    function saveCart() {
+      localStorage.setItem('kitob_cart', JSON.stringify(cart));
+      updateBadges();
+      renderCartPage();
+    }
+
+    function changeItemQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      }
+      saveCart();
+    }
+
+    function deleteCartItem(id) {
+      cart = cart.filter(i => i.id !== id);
+      saveCart();
+      showToast("Mahsulot savatchadan o'chirildi", "info");
+    }
+
+    function applyPromoCode() {
+      const code = document.getElementById('couponInput').value.trim().toUpperCase();
+      if (code === 'KITOB20') {
+        discountPercent = 20;
+        showToast("20% chegirma muvaffaqiyatli qo'llandi! 🎉", "success");
+        confetti({ particleCount: 40, spread: 50 });
+        renderCartPage();
+      } else if (code === 'SENIOR') {
+        discountPercent = 30;
+        showToast("Senior Developer Maxsus: 30% Chegirma! 🚀", "success");
+        confetti({ particleCount: 60, spread: 70 });
+        renderCartPage();
+      } else {
+        showToast("Kupon topilmadi yoki muddati o'tgan!", "error");
+      }
+    }
+
+    function selectPayment(name, el) {
+      selectedPayment = name;
+      document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    /* ==========================================================================
+       RENDER CART & CHECKOUT PAGE
+       ========================================================================== */
+    function renderCartPage() {
+      const wrap = document.getElementById('cartContentWrap');
+
+      if (cart.length === 0) {
+        wrap.innerHTML = `
+          <div class="empty-cart-view">
+            <i class="fa-solid fa-basket-shopping" style="font-size: 3.5rem; color: var(--text-dim); margin-bottom: 16px;"></i>
+            <h2 style="font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin-bottom: 8px;">
+              ${TRANSLATIONS[currentLang].empty_cart_title}
+            </h2>
+            <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 24px;">
+              ${TRANSLATIONS[currentLang].empty_cart_desc}
+            </p>
+            <a href="catalog.html" class="btn btn-primary">
+              <i class="fa-solid fa-compass"></i> <span>${TRANSLATIONS[currentLang].btn_explore_catalog}</span>
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      // Calculations
+      let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      let discountAmount = Math.round((subtotal * discountPercent) / 100);
+      let deliveryFee = subtotal >= 150000 ? 0 : 20000;
+      let grandTotal = subtotal - discountAmount + deliveryFee;
+
+      wrap.innerHTML = `
+        <div class="cart-grid">
+          <!-- Left: Cart Items List -->
+          <div class="cart-box">
+            <h3 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 800; margin-bottom: 20px;">
+              <i class="fa-solid fa-bag-shopping" style="color: var(--primary);"></i>
+              Tanlangan Kitoblar (${cart.length})
+            </h3>
+
+            <div>
+              ${cart.map(item => `
+                <div class="cart-item-row">
+                  <div class="cart-thumb" style="background: ${item.bgGradient || 'var(--primary)'};">
+                    <i class="fa-solid fa-book"></i>
+                  </div>
+                  <div class="item-meta">
+                    <h4>${item.title}</h4>
+                    <span class="item-unit-price">${item.price.toLocaleString()} UZS / dona</span>
+                  </div>
+                  <div class="qty-ctrl">
+                    <button class="qty-btn" onclick="changeItemQty(${item.id}, -1)">-</button>
+                    <span class="qty-val">${item.qty}</span>
+                    <button class="qty-btn" onclick="changeItemQty(${item.id}, 1)">+</button>
+                  </div>
+                  <div class="item-total-price">
+                    ${(item.price * item.qty).toLocaleString()} UZS
+                  </div>
+                  <button class="delete-item-btn" onclick="deleteCartItem(${item.id})" title="O'chirish">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Coupon Input -->
+            <div class="coupon-box">
+              <input type="text" id="couponInput" class="form-control" placeholder="${TRANSLATIONS[currentLang].coupon_placeholder}">
+              <button class="btn btn-outline" onclick="applyPromoCode()">
+                <i class="fa-solid fa-tag"></i> <span>${TRANSLATIONS[currentLang].btn_apply_coupon}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Checkout & Dispatch Form -->
+          <form class="checkout-box" onsubmit="processOrder(event)">
+            <h3 class="checkout-title">
+              <i class="fa-solid fa-truck-ramp-box" style="color: var(--accent);"></i>
+              <span>${TRANSLATIONS[currentLang].checkout_header}</span>
+            </h3>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_name}</label>
+              <input type="text" id="orderFullName" class="form-control" placeholder="Alisher Karimov" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_phone}</label>
+              <input type="tel" id="orderPhone" class="form-control" placeholder="+998 90 123 45 67" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_city}</label>
+              <select id="orderCity" class="form-control" style="cursor: pointer;">
+                <option value="Toshkent shahri">Toshkent shahri</option>
+                <option value="Samarqand">Samarqand</option>
+                <option value="Buxoro">Buxoro</option>
+                <option value="Andijon">Andijon</option>
+                <option value="Farg'ona">Farg'ona</option>
+                <option value="Namangan">Namangan</option>
+                <option value="Xorazm">Xorazm</option>
+                <option value="Qashqadaryo">Qashqadaryo</option>
+                <option value="Surxondaryo">Surxondaryo</option>
+                <option value="Jizzax">Jizzax</option>
+                <option value="Sirdaryo">Sirdaryo</option>
+                <option value="Navoiy">Navoiy</option>
+                <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_address}</label>
+              <input type="text" id="orderAddress" class="form-control" placeholder="Chilonzor 9-mavze, 12-uy, 34-xonadon" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_payment}</label>
+              <div class="payment-options">
+                <div class="pay-card ${selectedPayment === 'Payme' ? 'active' : ''}" onclick="selectPayment('Payme', this)">
+                  <i class="fa-solid fa-credit-card"></i> Payme
+                </div>
+                <div class="pay-card ${selectedPayment === 'Click' ? 'active' : ''}" onclick="selectPayment('Click', this)">
+                  <i class="fa-solid fa-mobile-screen"></i> Click
+                </div>
+                <div class="pay-card ${selectedPayment === 'Uzum' ? 'active' : ''}" onclick="selectPayment('Uzum', this)">
+                  <i class="fa-solid fa-wallet"></i> Uzum Bank
+                </div>
+                <div class="pay-card ${selectedPayment === 'Naqd' ? 'active' : ''}" onclick="selectPayment('Naqd', this)">
+                  <i class="fa-solid fa-money-bill-wave"></i> Naqd pul
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">${TRANSLATIONS[currentLang].label_comment}</label>
+              <textarea id="orderComment" class="form-control" rows="2" placeholder="Masalan: Uyda bo'lmasam eshik oldida qoldiring..."></textarea>
+            </div>
+
+            <!-- Price Breakdown Summary -->
+            <div class="summary-list">
+              <div class="summary-row">
+                <span style="color: var(--text-muted);">${TRANSLATIONS[currentLang].summary_subtotal}</span>
+                <span style="font-weight: 700;">${subtotal.toLocaleString()} UZS</span>
+              </div>
+
+              ${discountPercent > 0 ? `
+                <div class="summary-row" style="color: var(--success);">
+                  <span>${TRANSLATIONS[currentLang].summary_discount} (${discountPercent}%):</span>
+                  <span style="font-weight: 700;">-${discountAmount.toLocaleString()} UZS</span>
+                </div>
+              ` : ''}
+
+              <div class="summary-row">
+                <span style="color: var(--text-muted);">${TRANSLATIONS[currentLang].summary_delivery}</span>
+                <span style="font-weight: 700; color: ${deliveryFee === 0 ? 'var(--success)' : 'var(--text)'};">
+                  ${deliveryFee === 0 ? TRANSLATIONS[currentLang].summary_free : `${deliveryFee.toLocaleString()} UZS`}
+                </span>
+              </div>
+
+              <div class="summary-row total">
+                <span>${TRANSLATIONS[currentLang].summary_total}</span>
+                <span style="color: var(--accent);">${grandTotal.toLocaleString()} UZS</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.05rem;">
+              <i class="fa-brands fa-telegram"></i>
+              <span>${TRANSLATIONS[currentLang].btn_submit_order}</span>
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    /* ==========================================================================
+       SUBMIT ORDER & TELEGRAM BOT API DISPATCH
+       ========================================================================== */
+    async function processOrder(e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById('orderFullName').value.trim();
+      const phone = document.getElementById('orderPhone').value.trim();
+      const city = document.getElementById('orderCity').value;
+      const address = document.getElementById('orderAddress').value.trim();
+      const comment = document.getElementById('orderComment').value.trim();
+
+      const orderNumber = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Calculate totals
+      let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      let discountAmount = Math.round((subtotal * discountPercent) / 100);
+      let deliveryFee = subtotal >= 150000 ? 0 : 20000;
+      let grandTotal = subtotal - discountAmount + deliveryFee;
+
+      // Build Items List
+      const itemsListFormatted = cart.map((item, index) =>
+        `${index + 1}. *${item.title}* x ${item.qty} = ${(item.price * item.qty).toLocaleString()} UZS`
+      ).join('\n');
+
+      // Compose Telegram Markdown Message
+      const tgMessage =
+        `📚 *YANGI BUYURTMA #${orderNumber}*\n` +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `👤 *Mijoz:* ${fullName}\n` +
+        `📞 *Telefon:* ${phone}\n` +
+        `📍 *Shahar/Viloyat:* ${city}\n` +
+        `🏠 *Manzil:* ${address}\n` +
+        `💳 *To'lov usuli:* ${selectedPayment}\n` +
+        (comment ? `📝 *Izoh:* ${comment}\n` : '') +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `🛒 *Mahsulotlar ro'yxati:*\n` +
+        `${itemsListFormatted}\n` +
+        `━━━━━━━━━━━━━━━━━━━\n` +
+        `🏷 *Tovarlar:* ${subtotal.toLocaleString()} UZS\n` +
+        (discountPercent > 0 ? `🎁 *Chegirma (${discountPercent}%):* -${discountAmount.toLocaleString()} UZS\n` : '') +
+        `🚚 *Yetkazish:* ${deliveryFee === 0 ? 'Bepul' : `${deliveryFee.toLocaleString()} UZS`}\n` +
+        `💰 *JAMI TO'LOV:* ${grandTotal.toLocaleString()} UZS\n` +
+        `⏱ *Vaqt:* ${new Date().toLocaleString()}`;
+
+      // Retrieve bot token & chat ID
+      const savedTg = JSON.parse(localStorage.getItem('kitob_tg_config')) || {};
+      const botToken = savedTg.botToken;
+      const chatId = savedTg.chatId;
+
+      if (botToken && chatId) {
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: tgMessage,
+              parse_mode: 'Markdown'
+            })
+          });
+          showToast("Buyurtma Telegram botingizga yuborildi! 📬", "success");
+        } catch (err) {
+          console.warn("Telegram bot error:", err);
+          showToast("Telegramga yuborishda xatolik, lekin buyurtma saqlandi!", "info");
+        }
+      } else {
+        showToast("Eslatma: Telegram bot sozlanmagan, buyurtma tizimda saqlandi!", "info");
+      }
+
+      // Celebrate with confetti
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+
+      // Clear Cart
+      cart = [];
+      localStorage.setItem('kitob_cart', JSON.stringify(cart));
+      updateBadges();
+
+      // Show Success Modal
+      document.getElementById('successOrderId').textContent = `#${orderNumber}`;
+      document.getElementById('orderSuccessModal').classList.add('active');
+    }
+
+    function showToast(message, type = "success") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info'}" style="color: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--primary)'};"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(50px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(currentTheme);
+      setLanguage(currentLang);
+      updateBadges();
+      renderCartPage();
+    });
+  </script>
+</body>
+
+</html>

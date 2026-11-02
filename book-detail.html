@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitobUz — Algoritmlar va Kelajak | Kitob Tafsilotlari va Sharhlar</title>
+  <meta name="description"
+    content="Algoritmlar va Kelajak kitobi haqida to'liq ma'lumot: mundarija, kitobxonlar fikrlari, audio parcha va Telegram orqali xarid qilish.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS
+       ========================================================================== */
+    :root {
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-title: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg: #090d16;
+      --bg-alt: #0f172a;
+      --surface: #131b2e;
+      --surface-card: rgba(19, 27, 46, 0.75);
+      --surface-glass: rgba(19, 27, 46, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.35);
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 40px -5px rgba(0, 0, 0, 0.7);
+
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-alt: #f1f5f9;
+      --surface: #ffffff;
+      --surface-card: rgba(255, 255, 255, 0.85);
+      --surface-glass: rgba(255, 255, 255, 0.75);
+      --border: rgba(0, 0, 0, 0.09);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.2);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+      color: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Ambient Orbs */
+    .bg-ambient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+    }
+
+    .orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      top: -100px;
+      left: 20%;
+    }
+
+    .orb-2 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      bottom: 10%;
+      right: 10%;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 76px;
+      gap: 20px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-title);
+      font-weight: 800;
+      font-size: 1.45rem;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.25rem;
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 0;
+      position: relative;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      position: relative;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Lang Menu */
+    .lang-dropdown {
+      position: relative;
+    }
+
+    .lang-btn {
+      padding: 8px 14px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 150px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      list-style: none;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 100;
+    }
+
+    .lang-menu.show {
+      display: flex;
+    }
+
+    .lang-item {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .lang-item:hover,
+    .lang-item.active {
+      background: var(--bg-alt);
+      color: var(--primary);
+    }
+
+    /* DETAIL HERO SECTION */
+    .detail-page {
+      padding-top: 110px;
+      padding-bottom: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--primary);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 50px;
+      align-items: start;
+      margin-bottom: 60px;
+    }
+
+    /* 3D Visualizer Card */
+    .detail-3d-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .detail-canvas-wrap {
+      width: 100%;
+      height: 380px;
+      position: relative;
+      cursor: grab;
+    }
+
+    .detail-canvas-wrap:active {
+      cursor: grabbing;
+    }
+
+    #detailThreeCanvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .interactive-tip {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    /* Book Info Content */
+    .detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .detail-tag-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .genre-badge {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .rating-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .detail-title {
+      font-family: var(--font-title);
+      font-size: clamp(2.2rem, 3.5vw, 3rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+    }
+
+    .detail-author {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .detail-author strong {
+      color: var(--text);
+    }
+
+    .price-box {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .current-price {
+      font-family: var(--font-title);
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .old-price {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      text-decoration: line-through;
+    }
+
+    .discount-badge {
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    /* Actions Bar */
+    .buy-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .qty-counter {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+    }
+
+    .qty-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .qty-display {
+      width: 44px;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      box-shadow: 0 10px 25px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn-outline {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-alt);
+      border-color: var(--primary);
+    }
+
+    /* Audio Preview Player */
+    .audio-sample-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .play-audio-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .audio-info {
+      flex: 1;
+    }
+
+    .audio-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .audio-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .audio-progress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.1s linear;
+    }
+
+    /* Specs Table */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-alt);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+    }
+
+    .spec-label {
+      color: var(--text-muted);
+    }
+
+    .spec-val {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* TABS SECTION */
+    .tabs-wrapper {
+      margin-top: 40px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      backdrop-filter: blur(10px);
+    }
+
+    .tabs-header {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -17px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--primary);
+      border-radius: var(--radius-full);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Reviews */
+    .reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .review-card {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .review-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .reviewer-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .review-date {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* Review Form */
+    .review-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+
+    .star-select {
+      display: flex;
+      gap: 6px;
+      font-size: 1.3rem;
+      color: var(--accent);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+    }
+
+    /* DIRECT ORDER MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 500px;
+      padding: 32px;
+      position: relative;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-alt);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 90px;
+      right: 24px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .toast-success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast-info {
+      border-left: 4px solid var(--primary);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 60px 0 30px;
+      margin-top: auto;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-ambient">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-logo">
+        <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+        <span>Kitob<span class="text-gradient">Uz</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link" data-i18n="nav_home">Bosh sahifa</a></li>
+          <li><a href="catalog.html" class="nav-link" data-i18n="nav_catalog">Katalog</a></li>
+          <li><a href="book-detail.html" class="nav-link active" data-i18n="nav_details">Kitob tafsiloti</a></li>
+          <li><a href="favorites.html" class="nav-link" data-i18n="nav_favorites">Sevimlilar</a></li>
+          <li><a href="cart.html" class="nav-link" data-i18n="nav_cart">Savatcha</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <div class="lang-dropdown">
+          <button class="lang-btn" id="langBtn">
+            <i class="fa-solid fa-globe"></i>
+            <span id="currentLangLabel">UZ</span>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+          </button>
+          <ul class="lang-menu" id="langMenu">
+            <li class="lang-item active" onclick="setLanguage('uz')">🇺🇿 O'zbekcha</li>
+            <li class="lang-item" onclick="setLanguage('ru')">🇷🇺 Русский</li>
+            <li class="lang-item" onclick="setLanguage('en')">🇬🇧 English</li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="action-btn" id="themeToggleBtn" title="Mavzu">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <!-- Wishlist -->
+        <a href="favorites.html" class="action-btn" title="Sevimlilar">
+          <i class="fa-regular fa-heart"></i>
+          <span class="badge-count" id="favCountBadge">0</span>
+        </a>
+
+        <!-- Cart -->
+        <a href="cart.html" class="action-btn" title="Savatcha">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="badge-count" id="cartCountBadge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DETAIL CONTENT -->
+  <main class="detail-page">
+    <div class="container">
+
+      <!-- Breadcrumbs -->
+      <div class="breadcrumbs">
+        <a href="/" data-i18n="nav_home">Bosh sahifa</a>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <a href="catalog.html" data-i18n="nav_catalog">Katalog</a>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <span style="color: var(--text);">Algoritmlar va Kelajak</span>
+      </div>
+
+      <!-- Main Detail Grid: 3D Model on Left, Info on Right -->
+      <div class="detail-grid">
+
+        <!-- 3D Interactive Model Viewer -->
+        <div class="detail-3d-box">
+          <div class="detail-canvas-wrap">
+            <canvas id="detailThreeCanvas"></canvas>
+          </div>
+          <div class="interactive-tip">
+            <i class="fa-solid fa-hand-pointer"></i>
+            <span data-i18n="tip_drag_3d">Sichqoncha bilan 3D kitobni istalgan burchakda aylantirib ko'rishingiz
+              mumkin</span>
+          </div>
+        </div>
+
+        <!-- Book Meta and Purchase Info -->
+        <div class="detail-info">
+          <div class="detail-tag-wrap">
+            <span class="genre-badge">IT & Sun'iy Intellekt</span>
+            <div class="rating-badge">
+              <i class="fa-solid fa-star"></i>
+              <span>4.9 / 5.0 (142 ta sharh)</span>
+            </div>
+          </div>
+
+          <h1 class="detail-title">Algoritmlar va Kelajak</h1>
+          <div class="detail-author">
+            <span data-i18n="author_label">Muallif:</span> <strong>Prof. Aziz Karimov</strong> (Senior System Architect)
+          </div>
+
+          <div class="price-box">
+            <div class="current-price">85,000 UZS</div>
+            <div class="old-price">120,000 UZS</div>
+            <div class="discount-badge">-29% Chegirma</div>
+          </div>
+
+          <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.7;" data-i18n="detail_synopsis">
+            Murakkab algoritmlar, taqsimlangan tizimlar arxitekturasi va zamonaviy sun'iy intellekt modellarining
+            fundamental ishlash tamoyillari haqida amaliy qo'llanma. Har bir dasturchi javonida bo'lishi shart bo'lgan
+            nodir asar.
+          </p>
+
+          <!-- Audio Sample Player (Web Audio API Synthesized Ambient Preview) -->
+          <div class="audio-sample-box">
+            <button class="play-audio-btn" id="audioPlayBtn" onclick="toggleAudioPreview()">
+              <i class="fa-solid fa-play" id="audioPlayIcon"></i>
+            </button>
+            <div class="audio-info">
+              <div class="audio-title" data-i18n="audio_preview_title">🎧 Audio parchani tinglash (1-bob kirish)</div>
+              <div class="audio-bar">
+                <div class="audio-progress" id="audioProgress"></div>
+              </div>
+            </div>
+            <span style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-dim);" id="audioTimer">0:00
+              / 0:15</span>
+          </div>
+
+          <!-- Purchase Controls -->
+          <div class="buy-actions-row">
+            <div class="qty-counter">
+              <button class="qty-btn" onclick="changeQty(-1)">-</button>
+              <span class="qty-display" id="qtyDisplay">1</span>
+              <button class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="addCurrentBookToCart()" style="flex: 1;">
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span data-i18n="btn_add_cart">Savatga qo'shish</span>
+            </button>
+
+            <button class="btn btn-outline" onclick="openDirectOrderModal()"
+              style="border-color: #0088cc; color: #0088cc;">
+              <i class="fa-brands fa-telegram"></i>
+              <span data-i18n="btn_quick_order">Tezkor Buyurtma</span>
+            </button>
+
+            <button class="action-btn" id="favDetailBtn" onclick="toggleDetailFav()" title="Sevimlilar">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+          </div>
+
+          <!-- Quick Specifications Grid -->
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label" data-i18n="spec_pages">Sahifalar:</span>
+              <span class="spec-val">480 bet</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label" data-i18n="spec_cover">Muqova:</span>
+              <span class="spec-val">Qattiq (Hardcover)</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label" data-i18n="spec_isbn">ISBN:</span>
+              <span class="spec-val">978-9943-00-123-4</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label" data-i18n="spec_lang">Tili:</span>
+              <span class="spec-val">O'zbekcha / Lotin</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TABS: Description, Chapters, Reviews -->
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab('desc', this)" data-i18n="tab_desc">To'liq Tavsif</button>
+          <button class="tab-btn" onclick="switchTab('chapters', this)" data-i18n="tab_chapters">Mundarija</button>
+          <button class="tab-btn" onclick="switchTab('reviews', this)" data-i18n="tab_reviews">Kitobxonlar Sharhlari
+            (3)</button>
+        </div>
+
+        <!-- Tab 1: Description -->
+        <div class="tab-content active" id="tab-desc">
+          <p style="margin-bottom: 16px; line-height: 1.8;">
+            Ushbu kitob nafaqat dasturchilar, balki murakkab IT loyihalarni rejalashtiruvchi muhandislar va
+            arxitektorlar uchun mo'ljallangan. Muallif eng so'nggi ma'lumotlar tuzilmasi, Big-O tahlili, asinxron
+            jarayonlar va sun'iy intellekt algoritmlarini sodda va hayotiy misollar orqali tushuntirib beradi.
+          </p>
+          <p style="line-height: 1.8;">
+            Har bir bob yakunida haqiqiy ishlab chiqarish (production) muhitida duch kelinadigan muammolar va ularning
+            optimal yechimlari tahlil qilingan. Kitob matbaasi yuqori sifatli qog'ozda, maxsus oltin hoshiyali qattiq
+            muqovada nashr etilgan.
+          </p>
+        </div>
+
+        <!-- Tab 2: Chapters -->
+        <div class="tab-content" id="tab-chapters">
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+            <li
+              style="padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+              <strong>1-Bob: Zamonaviy Kompyuter Ilmlari va Big-O</strong>
+              <span style="color: var(--text-dim);">14 - 58 betlar</span>
+            </li>
+            <li
+              style="padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+              <strong>2-Bob: Daraxtlar, Graflar va Qidiruv Strategiyalari</strong>
+              <span style="color: var(--text-dim);">59 - 134 betlar</span>
+            </li>
+            <li
+              style="padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+              <strong>3-Bob: Dinamik Dasturlash va Resurslarni Taqsimlash</strong>
+              <span style="color: var(--text-dim);">135 - 240 betlar</span>
+            </li>
+            <li
+              style="padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+              <strong>4-Bob: Neyron Tarmoqlar Matematikasi va LLM Arxitekturasi</strong>
+              <span style="color: var(--text-dim);">241 - 380 betlar</span>
+            </li>
+            <li
+              style="padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); display: flex; justify-content: space-between;">
+              <strong>5-Bob: Katta Hajmli Tizimlarda Xavfsizlik va Masshtablash</strong>
+              <span style="color: var(--text-dim);">381 - 480 betlar</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Tab 3: Reviews -->
+        <div class="tab-content" id="tab-reviews">
+          <div class="reviews-list" id="reviewsContainer">
+            <div class="review-card">
+              <div class="review-top">
+                <span class="reviewer-name">Jasurbek Mahmudov</span>
+                <span class="review-date">28.10.2026</span>
+              </div>
+              <div style="color: var(--accent); font-size: 0.85rem; margin-bottom: 6px;"><i
+                  class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                  class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+              <p style="font-size: 0.92rem; color: var(--text-muted);">Kitob juda a'lo darajada yozilgan. Ayniqsa
+                graflar va neyron tarmoqlar bobi amaliy misollar bilan boyitilgani katta yordam berdi!</p>
+            </div>
+            <div class="review-card">
+              <div class="review-top">
+                <span class="reviewer-name">Nilufar Oripova</span>
+                <span class="review-date">15.10.2026</span>
+              </div>
+              <div style="color: var(--accent); font-size: 0.85rem; margin-bottom: 6px;"><i
+                  class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
+                  class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+              <p style="font-size: 0.92rem; color: var(--text-muted);">Yetkazib berish juda tez amalga oshirildi,
+                qadoqlanishi ham mukammal. Barchaga tavsiya qilaman.</p>
+            </div>
+          </div>
+
+          <!-- Add Review Form -->
+          <div class="review-form">
+            <h4 style="font-family: var(--font-title); font-size: 1.15rem; margin-bottom: 12px;"
+              data-i18n="add_review_title">O'z fikringizni qoldiring</h4>
+            <div class="star-select" id="starRatingSelector">
+              <i class="fa-solid fa-star" data-rating="1"></i>
+              <i class="fa-solid fa-star" data-rating="2"></i>
+              <i class="fa-solid fa-star" data-rating="3"></i>
+              <i class="fa-solid fa-star" data-rating="4"></i>
+              <i class="fa-solid fa-star" data-rating="5"></i>
+            </div>
+            <input type="text" id="reviewerNameInput" class="form-control" placeholder="Ismingiz..." required>
+            <textarea id="reviewTextInput" class="form-control" rows="3" placeholder="Kitob haqidagi taassurotingiz..."
+              required></textarea>
+            <button class="btn btn-primary" onclick="submitReview()">
+              <i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_submit_review">Sharhni yuborish</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- DIRECT TELEGRAM ORDER MODAL -->
+  <div class="modal-overlay" id="directOrderModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeDirectOrderModal()"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="font-family: var(--font-title); font-size: 1.35rem; font-weight: 800; margin-bottom: 8px;">
+        <i class="fa-brands fa-telegram" style="color: #0088cc;"></i>
+        <span data-i18n="quick_order_title">Tezkor Buyurtma Berish</span>
+      </h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 20px;" data-i18n="quick_order_desc">
+        Ma'lumotlaringizni qoldiring, buyurtma bir zumda Telegram bot orqali operatorga yetib boradi.
+      </p>
+
+      <form onsubmit="handleDirectOrder(event)">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Ismingiz:</label>
+          <input type="text" id="directName" class="form-control" placeholder="Alisher Karimov" required>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Telefon
+            raqamingiz:</label>
+          <input type="tel" id="directPhone" class="form-control" placeholder="+998 90 123 45 67" required>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Yetkazib berish
+            manzili:</label>
+          <input type="text" id="directAddress" class="form-control" placeholder="Toshkent shahar, Yunusobod tumani..."
+            required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_confirm_order">Buyurtmani tasdiqlash</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="margin-bottom: 14px;">
+            <div class="logo-icon"><i class="fa-solid fa-book-open"></i></div>
+            <span>Kitob<span class="text-gradient">Uz</span></span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Kitoblar dunyosiga innovatsion eshik. 3D interaktiv
+            mutolaa va qulay xarid.</p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Tezkor Havolalar</h4>
+          <p><a href="/" style="color: var(--text-muted); font-size: 0.9rem;">Bosh sahifa</a></p>
+          <p><a href="catalog.html" style="color: var(--text-muted); font-size: 0.9rem;">Katalog</a></p>
+          <p><a href="favorites.html" style="color: var(--text-muted); font-size: 0.9rem;">Sevimlilar</a></p>
+          <p><a href="cart.html" style="color: var(--text-muted); font-size: 0.9rem;">Savatcha</a></p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Qo'llab-quvvatlash</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Telegram: @kitobuz_bot</p>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Call-center: 1199</p>
+        </div>
+        <div>
+          <h4 style="font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 14px;">Xavfsiz Xarid</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">100% Asl nashrlar kafolati va qaytarish imkoniyati.
+          </p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 KitobUz. Barcha huquqlar himoyalangan.</div>
+        <div>Senior Frontend Engineering Quality</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       I18N TRANSLATIONS
+       ========================================================================== */
+    const TRANSLATIONS = {
+      uz: {
+        nav_home: "Bosh sahifa",
+        nav_catalog: "Katalog",
+        nav_details: "Kitob tafsiloti",
+        nav_favorites: "Sevimlilar",
+        nav_cart: "Savatcha",
+        tip_drag_3d: "Sichqoncha bilan 3D kitobni istalgan burchakda aylantirib ko'rishingiz mumkin",
+        author_label: "Muallif:",
+        detail_synopsis: "Murakkab algoritmlar, taqsimlangan tizimlar arxitekturasi va zamonaviy sun'iy intellekt modellarining fundamental ishlash tamoyillari haqida amaliy qo'llanma. Har bir dasturchi javonida bo'lishi shart bo'lgan nodir asar.",
+        audio_preview_title: "🎧 Audio parchani tinglash (1-bob kirish)",
+        btn_add_cart: "Savatga qo'shish",
+        btn_quick_order: "Tezkor Buyurtma",
+        spec_pages: "Sahifalar:",
+        spec_cover: "Muqova:",
+        spec_isbn: "ISBN:",
+        spec_lang: "Tili:",
+        tab_desc: "To'liq Tavsif",
+        tab_chapters: "Mundarija",
+        tab_reviews: "Kitobxonlar Sharhlari",
+        add_review_title: "O'z fikringizni qoldiring",
+        btn_submit_review: "Sharhni yuborish",
+        quick_order_title: "Tezkor Buyurtma Berish",
+        quick_order_desc: "Ma'lumotlaringizni qoldiring, buyurtma bir zumda Telegram bot orqali operatorga yetib boradi.",
+        btn_confirm_order: "Buyurtmani tasdiqlash"
+      },
+      ru: {
+        nav_home: "Главная",
+        nav_catalog: "Каталог",
+        nav_details: "О книге",
+        nav_favorites: "Избранное",
+        nav_cart: "Корзина",
+        tip_drag_3d: "Вращайте 3D книгу мышью в любом направлении для детального осмотра",
+        author_label: "Автор:",
+        detail_synopsis: "Практическое руководство по сложным алгоритмам, распределенной архитектуре и принципам современных моделей ИИ. Фундаментальный труд для каждого инженера.",
+        audio_preview_title: "🎧 Прослушать аудио-фрагмент (Введение)",
+        btn_add_cart: "В корзину",
+        btn_quick_order: "Быстрый заказ",
+        spec_pages: "Страниц:",
+        spec_cover: "Переплет:",
+        spec_isbn: "ISBN:",
+        spec_lang: "Язык:",
+        tab_desc: "Описание",
+        tab_chapters: "Содержание",
+        tab_reviews: "Отзывы читателей",
+        add_review_title: "Оставить отзыв",
+        btn_submit_review: "Отправить отзыв",
+        quick_order_title: "Быстрый Заказ через Telegram",
+        quick_order_desc: "Оставьте контакты, и заказ моментально поступит в Telegram бот оператору.",
+        btn_confirm_order: "Подтвердить заказ"
+      },
+      en: {
+        nav_home: "Home",
+        nav_catalog: "Catalog",
+        nav_details: "Book Details",
+        nav_favorites: "Favorites",
+        nav_cart: "Cart",
+        tip_drag_3d: "Drag with mouse to rotate and inspect the 3D book model in 360 degrees",
+        author_label: "Author:",
+        detail_synopsis: "A definitive guide to complex data structures, distributed architecture, and foundations of contemporary AI models. An indispensable reference for every senior engineer.",
+        audio_preview_title: "🎧 Listen to Audio Snippet (Intro)",
+        btn_add_cart: "Add to Cart",
+        btn_quick_order: "Instant Order",
+        spec_pages: "Pages:",
+        spec_cover: "Binding:",
+        spec_isbn: "ISBN:",
+        spec_lang: "Language:",
+        tab_desc: "Detailed Synopsis",
+        tab_chapters: "Table of Contents",
+        tab_reviews: "Reader Reviews",
+        add_review_title: "Leave a Review",
+        btn_submit_review: "Post Review",
+        quick_order_title: "Direct Telegram Order",
+        quick_order_desc: "Submit details to instantly dispatch this book purchase to the Telegram bot.",
+        btn_confirm_order: "Confirm Order"
+      }
+    };
+
+    let currentLang = localStorage.getItem('kitob_lang') || 'uz';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('kitob_lang', lang);
+      document.getElementById('currentLangLabel').textContent = lang.toUpperCase();
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (TRANSLATIONS[lang][k]) el.textContent = TRANSLATIONS[lang][k];
+      });
+      document.getElementById('langMenu').classList.remove('show');
+    }
+
+    document.getElementById('langBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('langMenu').classList.toggle('show');
+    });
+    document.addEventListener('click', () => document.getElementById('langMenu').classList.remove('show'));
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    let currentTheme = localStorage.getItem('kitob_theme') || 'dark';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('kitob_theme', theme);
+      themeBtn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    }
+    themeBtn.addEventListener('click', () => {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(currentTheme);
+    });
+
+    /* ==========================================================================
+       CART & QUANTITY STATE
+       ========================================================================== */
+    let cart = JSON.parse(localStorage.getItem('kitob_cart')) || [];
+    let favorites = JSON.parse(localStorage.getItem('kitob_favorites')) || [];
+    let currentQty = 1;
+
+    function updateBadges() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCountBadge').textContent = totalCount;
+      document.getElementById('favCountBadge').textContent = favorites.length;
+      const favBtn = document.getElementById('favDetailBtn');
+      if (favorites.includes(1)) {
+        favBtn.innerHTML = '<i class="fa-solid fa-heart" style="color: var(--danger);"></i>';
+      } else {
+        favBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+      }
+    }
+
+    function changeQty(delta) {
+      currentQty = Math.max(1, currentQty + delta);
+      document.getElementById('qtyDisplay').textContent = currentQty;
+    }
+
+    function addCurrentBookToCart() {
+      const existing = cart.find(i => i.id === 1);
+      if (existing) {
+        existing.qty += currentQty;
+      } else {
+        cart.push({
+          id: 1,
+          title: "Algoritmlar va Kelajak",
+          price: 85000,
+          qty: currentQty,
+          bgGradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)"
+        });
+      }
+      localStorage.setItem('kitob_cart', JSON.stringify(cart));
+      updateBadges();
+      showToast(`"Algoritmlar va Kelajak" (${currentQty} ta) savatga qo'shildi!`, "success");
+    }
+
+    function toggleDetailFav() {
+      const idx = favorites.indexOf(1);
+      if (idx > -1) {
+        favorites.splice(idx, 1);
+        showToast("Sevimlilardan olib tashlandi", "info");
+      } else {
+        favorites.push(1);
+        showToast("Sevimlilarga saqlandi!", "success");
+      }
+      localStorage.setItem('kitob_favorites', JSON.stringify(favorites));
+      updateBadges();
+    }
+
+    /* ==========================================================================
+       TAB SWITCHER
+       ========================================================================== */
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    /* ==========================================================================
+       DIRECT ORDER MODAL & TELEGRAM DISPATCH
+       ========================================================================== */
+    function openDirectOrderModal() {
+      document.getElementById('directOrderModal').classList.add('active');
+    }
+    function closeDirectOrderModal() {
+      document.getElementById('directOrderModal').classList.remove('active');
+    }
+
+    async function handleDirectOrder(e) {
+      e.preventDefault();
+      const name = document.getElementById('directName').value.trim();
+      const phone = document.getElementById('directPhone').value.trim();
+      const address = document.getElementById('directAddress').value.trim();
+
+      const tgConfig = JSON.parse(localStorage.getItem('kitob_tg_config')) || {};
+      const botToken = tgConfig.botToken || '';
+      const chatId = tgConfig.chatId || '';
+
+      const totalSum = 85000 * currentQty;
+      const orderMessage = `🔥 *YANGI TEZKOR BUYURTMA #ORD-${Math.floor(1000 + Math.random() * 9000)}*\n\n` +
+        `👤 *Mijoz:* ${name}\n` +
+        `📞 *Telefon:* ${phone}\n` +
+        `📍 *Manzil:* ${address}\n\n` +
+        `📚 *Kitob:* Algoritmlar va Kelajak\n` +
+        `🔢 *Miqdor:* ${currentQty} dona\n` +
+        `💰 *Jami to'lov:* ${totalSum.toLocaleString()} UZS\n` +
+        `⏱ *Vaqt:* ${new Date().toLocaleString()}`;
+
+      if (botToken && chatId) {
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: orderMessage, parse_mode: 'Markdown' })
+          });
+        } catch (err) {
+          console.error("Telegram send error:", err);
+        }
+      }
+
+      closeDirectOrderModal();
+      showToast("Buyurtmangiz qabul qilindi! Tez orada operator bog'lanadi.", "success");
+    }
+
+    /* ==========================================================================
+       AUDIO PREVIEW SYNTHESIZER (Web Audio API)
+       ========================================================================== */
+    let audioCtx = null;
+    let isPlayingAudio = false;
+    let audioInterval = null;
+    let audioSeconds = 0;
+
+    function toggleAudioPreview() {
+      if (isPlayingAudio) {
+        stopAudioPreview();
+      } else {
+        startAudioPreview();
+      }
+    }
+
+    function startAudioPreview() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      isPlayingAudio = true;
+      document.getElementById('audioPlayIcon').className = 'fa-solid fa-pause';
+      audioSeconds = 0;
+
+      // Play soft ambient tone
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(260, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+
+      audioInterval = setInterval(() => {
+        audioSeconds++;
+        const prog = (audioSeconds / 15) * 100;
+        document.getElementById('audioProgress').style.width = `${prog}%`;
+        document.getElementById('audioTimer').textContent = `0:${audioSeconds < 10 ? '0' : ''}${audioSeconds} / 0:15`;
+
+        if (audioSeconds >= 15) {
+          osc.stop();
+          stopAudioPreview();
+        }
+      }, 1000);
+    }
+
+    function stopAudioPreview() {
+      isPlayingAudio = false;
+      document.getElementById('audioPlayIcon').className = 'fa-solid fa-play';
+      clearInterval(audioInterval);
+      document.getElementById('audioProgress').style.width = `0%`;
+      document.getElementById('audioTimer').textContent = `0:00 / 0:15`;
+    }
+
+    /* ==========================================================================
+       REVIEWS SUBMISSION
+       ========================================================================== */
+    function submitReview() {
+      const name = document.getElementById('reviewerNameInput').value.trim();
+      const text = document.getElementById('reviewTextInput').value.trim();
+      if (!name || !text) {
+        showToast("Iltimos, ismingiz va fikringizni yozing!", "error");
+        return;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'review-card';
+      card.innerHTML = `
+        <div class="review-top">
+          <span class="reviewer-name">${name}</span>
+          <span class="review-date">${new Date().toLocaleDateString()}</span>
+        </div>
+        <div style="color: var(--accent); font-size: 0.85rem; margin-bottom: 6px;"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+        <p style="font-size: 0.92rem; color: var(--text-muted);">${text}</p>
+      `;
+
+      document.getElementById('reviewsContainer').prepend(card);
+      document.getElementById('reviewerNameInput').value = '';
+      document.getElementById('reviewTextInput').value = '';
+      showToast("Sharhingiz chop etildi! Rahmat.", "success");
+    }
+
+    function showToast(message, type = "success") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}" style="color: ${type === 'success' ? 'var(--success)' : 'var(--primary)'};"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(50px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    /* ==========================================================================
+       THREE.JS INTERACTIVE 3D BOOK ROTATOR
+       ========================================================================== */
+    let detailScene, detailCamera, detailRenderer, detailBookMesh;
+    let isDragging = false, prevMouseX = 0, prevMouseY = 0;
+
+    function initDetailThree() {
+      const wrap = document.querySelector('.detail-canvas-wrap');
+      const canvas = document.getElementById('detailThreeCanvas');
+
+      detailScene = new THREE.Scene();
+      detailCamera = new THREE.PerspectiveCamera(40, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
+      detailCamera.position.set(0, 0, 5.8);
+
+      detailRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      detailRenderer.setSize(wrap.clientWidth, wrap.clientHeight);
+      detailRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const amb = new THREE.AmbientLight(0xffffff, 0.9);
+      detailScene.add(amb);
+
+      const light1 = new THREE.DirectionalLight(0xffedd5, 1.5);
+      light1.position.set(5, 5, 5);
+      detailScene.add(light1);
+
+      const light2 = new THREE.PointLight(0x6366f1, 2, 10);
+      light2.position.set(-4, -2, 3);
+      detailScene.add(light2);
+
+      // Book Geometry
+      const geometry = new THREE.BoxGeometry(2.2, 3.2, 0.4);
+
+      // Procedural leather texture
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 768;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 512, 768);
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(20, 20, 472, 728);
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 36px Outfit, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ALGORITMLAR', 256, 360);
+      ctx.fillText('& KELAJAK', 256, 410);
+
+      const tex = new THREE.CanvasTexture(c);
+      const materials = [
+        new THREE.MeshStandardMaterial({ color: 0x1e293b }), // right edge
+        new THREE.MeshStandardMaterial({ color: 0x0f172a }), // spine
+        new THREE.MeshStandardMaterial({ color: 0x1e293b }), // top edge
+        new THREE.MeshStandardMaterial({ color: 0x1e293b }), // bottom edge
+        new THREE.MeshStandardMaterial({ map: tex }),        // front cover
+        new THREE.MeshStandardMaterial({ color: 0x0f172a })  // back cover
+      ];
+
+      detailBookMesh = new THREE.Mesh(geometry, materials);
+      detailBookMesh.rotation.y = -0.35;
+      detailBookMesh.rotation.x = 0.15;
+      detailScene.add(detailBookMesh);
+
+      // Interactive Mouse Rotate
+      wrap.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+
+      window.addEventListener('mouseup', () => isDragging = false);
+
+      wrap.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        detailBookMesh.rotation.y += deltaX * 0.01;
+        detailBookMesh.rotation.x += deltaY * 0.01;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+
+      // Touch controls
+      wrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          prevMouseX = e.touches[0].clientX;
+          prevMouseY = e.touches[0].clientY;
+        }
+      });
+      wrap.addEventListener('touchend', () => isDragging = false);
+      wrap.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - prevMouseX;
+        const deltaY = e.touches[0].clientY - prevMouseY;
+        detailBookMesh.rotation.y += deltaX * 0.01;
+        detailBookMesh.rotation.x += deltaY * 0.01;
+        prevMouseX = e.touches[0].clientX;
+        prevMouseY = e.touches[0].clientY;
+      });
+
+      function render() {
+        requestAnimationFrame(render);
+        if (!isDragging) {
+          detailBookMesh.rotation.y += 0.004; // gentle auto-rotation
+        }
+        detailRenderer.render(detailScene, detailCamera);
+      }
+      render();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(currentTheme);
+      setLanguage(currentLang);
+      updateBadges();
+      initDetailThree();
+    });
+  </script>
+</body>
+
+</html>
